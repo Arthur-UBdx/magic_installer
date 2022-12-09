@@ -8,7 +8,7 @@ a = Analysis(
     ['modpack_installer_final.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('kanye.png', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -41,4 +41,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['cubonome1.ico'],
 )

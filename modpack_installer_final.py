@@ -15,6 +15,8 @@ import shutil
 import time
 import requests
 
+DIR = os.path.dirname(os.path.realpath(__file__))
+
 APPDATA = os.getenv('APPDATA')
 MINECRAFT_FOLDER = os.path.join(APPDATA, '.minecraft')
 MODS_FOLDER = os.path.join(APPDATA, '.minecraft', 'mods')
@@ -25,7 +27,7 @@ FABRIC_URL = 'https://github.com/Arthur-UBdx/fabric_minecraft/zipball/main'
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("Installateur magique de la raciscothèque")
-        MainWindow.resize(511, 342)
+        MainWindow.setFixedSize(510, 340)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -46,7 +48,7 @@ class Ui_MainWindow(object):
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(10, 50, 471, 211))
         self.label_2.setText("")
-        self.label_2.setPixmap(QtGui.QPixmap("kanye.png"))
+        self.label_2.setPixmap(QtGui.QPixmap(os.path.join(DIR,'kanye.png')))
         self.label_2.setScaledContents(True)
         self.label_2.setObjectName("label_2")
         self.label = QtWidgets.QLabel(self.centralwidget)
@@ -121,6 +123,12 @@ class Ui_MainWindow(object):
             return -1
 
     def download_mods(self):
+        #show Ui_progressBar window
+        self.progressBar = QtWidgets.QMainWindow()
+        self.ui_progressBar = Ui_ProgressBar()
+        self.ui_progressBar.setupUi(self.progressBar)
+        self.progressBar.show()
+
         self.delete_mods(show_dialog=False)
         if not os.path.isdir(MODS_FOLDER):
             os.mkdir(MODS_FOLDER)
@@ -130,13 +138,87 @@ class Ui_MainWindow(object):
             time.sleep(1)
         if self._unzip_files(os.path.join(MODS_FOLDER, 'mods.zip')):
             return -1
+        
+        self.progressBar.close()
+        #show Ui_FinishedInstall window
+        self.finishedInstall = QtWidgets.QMainWindow()
+        self.ui_finishedInstall = Ui_FinishedInstall()
+        self.ui_finishedInstall.setupUi(self.finishedInstall)
+        self.finishedInstall.show()
         return 0
 
     def delete_mods(self, show_dialog=True):
         shutil.rmtree(MODS_FOLDER)
         os.mkdir(MODS_FOLDER)
         return 0
-    
+
+
+class Ui_ProgressBar(object):
+    def setupUi(self, Form):
+        Form.setObjectName("Progress Bar")
+        Form.setFixedSize(400, 100)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
+        Form.setSizePolicy(sizePolicy)
+        Form.setMinimumSize(QtCore.QSize(400, 100))
+        Form.setMaximumSize(QtCore.QSize(400, 100))
+        self.label = QtWidgets.QLabel(Form)
+        self.label.setGeometry(QtCore.QRect(10, 10, 181, 21))
+        self.label.setObjectName("label")
+        self.progressBar = QtWidgets.QProgressBar(Form)
+        self.progressBar.setGeometry(QtCore.QRect(10, 40, 381, 21))
+        self.progressBar.setProperty("value", 1)
+        self.progressBar.setOrientation(QtCore.Qt.Horizontal)
+        self.progressBar.setObjectName("progressBar")
+
+        self.retranslateUi(Form)
+        QtCore.QMetaObject.connectSlotsByName(Form)
+
+    def retranslateUi(self, Form):
+        _translate = QtCore.QCoreApplication.translate
+        Form.setWindowTitle(_translate("Progress Bar", "Téléchargement..."))
+        self.label.setText(_translate("Progress Bar", "Téléchargement..."))
+        self.progressBar.setFormat(_translate("Progress Bar", "%p%"))
+
+    def setProgress(self, value):
+        self.progressBar.setProperty("value", value)
+
+
+class Ui_FinishedInstall(object):
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.setFixedSize(200, 144)
+        self.verticalLayoutWidget = QtWidgets.QWidget(Dialog)
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(40, 80, 121, 61))
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.pushButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.pushButton.setObjectName("pushButton")
+        self.verticalLayout.addWidget(self.pushButton)
+        self.label = QtWidgets.QLabel(Dialog)
+        self.label.setGeometry(QtCore.QRect(10, 30, 181, 41))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label.setFont(font)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setObjectName("label")
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+        self.pushButton.clicked.connect(Dialog.close)
+
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.pushButton.setText(_translate("Dialog", "Ok"))
+        self.label.setText(_translate("Dialog", "Installation terminée !"))
+
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
